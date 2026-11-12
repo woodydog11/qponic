@@ -1,7 +1,7 @@
 name: Merchant Intelligence v2 checks
 on:
   push:
-    branches: [feature/merchant-intelligence-v2]
+    branches: [feature/merchant-intelligence-v2, feature/offer-approval-engine]
   pull_request:
     branches: [develop]
 jobs:
