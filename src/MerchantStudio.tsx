@@ -50,7 +50,7 @@ export default function MerchantStudio({onBack}:{onBack:()=>void}){
   setBusy(true);setError("");setNotice("");
   try{
    const redirect=window.location.origin+"/?merchant=studio";
-   const r=await fetch(url+"/auth/v1/otp",{method:"POST",headers:headers(),body:JSON.stringify({email:email.trim(),create_user:true,options:{email_redirect_to:redirect}})});
+   const r=await fetch(url+"/auth/v1/otp?redirect_to="+encodeURIComponent(redirect),{method:"POST",headers:headers(),body:JSON.stringify({email:email.trim(),create_user:true})});
    if(!r.ok){const data=await r.json().catch(()=>({}));throw Error(data.msg||data.error_description||data.message||"Unable to send link");}
    setNotice("Check your email for a sign-in link. It may take a few minutes.");
   }catch(e){setError(e instanceof Error?e.message:"Unable to send sign-in link");}finally{setBusy(false);}
