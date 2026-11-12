@@ -64,11 +64,11 @@ export default function MerchantStudio({onBack}:{onBack:()=>void}){
    const merchantTurns=next.filter(m=>m.role==="user");
    const wantsOffers=/\\b(both|all three|all 3|three offers|create|generate|draft|make (?:the|my|some) offers|let.s do it)\\b/i.test(entry);
    const hasBusinessContext=merchantTurns.some(m=>/\\b(pizza|restaurant|shop|store|salon|cafe|coffee|gym|fitness|barber|retail|business|bakery|spa|service)\\b/i.test(m.content));
-   const automaticPortfolio=hasBusinessContext&&(wantsOffers||merchantTurns.length>=3);
+   const automaticPortfolio=hasBusinessContext&&(wantsOffers||merchantTurns.length>=2);
    const r=await fetch("/.netlify/functions/merchant-offer",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({messages:next.slice(-12),...(automaticPortfolio?{mode:"portfolio"}:{})})});
    const data=await r.json();if(!r.ok)throw new Error(data.error||"Offer assistant unavailable");
    setMessages([...next,{role:"assistant",content:data.reply}]);setMerchantId(data.merchant_id||"");
-   if(automaticPortfolio&&Array.isArray(data.offers)){setPortfolio(data.offers);setChosen(["FREE","BOGO","50% OFF"]);setDraft(null);setStrategy(null);setNotice("Your FREE, BOGO and 50% OFF offers are ready to review. Choose any combination to submit.");}
+   if(automaticPortfolio&&Array.isArray(data.offers)){setPortfolio(data.offers);setChosen(["FREE","BOGO","50% OFF"]);setDraft(null);setStrategy(null);setNotice("All three offers are ready below. Confirm the terms, then choose which drafts to save.");}
    else {setDraft(data.ready?data.draft:null);setStrategy(data.strategy||null);}
   }catch(e){setError(e instanceof Error?e.message:"Request failed");}finally{setBusy(false);}
  }
