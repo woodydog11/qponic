@@ -14,8 +14,8 @@ const stripeGet=async(path,key)=>{
 };
 export const handler=async(event)=>{
  if(event.httpMethod!=="POST")return json(405,{error:"Method not allowed"});
- const {STRIPE_WEBHOOK_SECRET,STRIPE_SECRET_KEY,SUPABASE_SERVICE_ROLE_KEY,VITE_SUPABASE_URL}=process.env;
- if(!STRIPE_WEBHOOK_SECRET||!STRIPE_SECRET_KEY||!SUPABASE_SERVICE_ROLE_KEY||!VITE_SUPABASE_URL)return json(503,{error:"Webhook not configured"});
+ const {STRIPE_WEBHOOK_SECRET,STRIPE_SECRET_KEY,SUPABASE_SECRET_KEY,VITE_SUPABASE_URL}=process.env;
+ if(!STRIPE_WEBHOOK_SECRET||!STRIPE_SECRET_KEY||!SUPABASE_SECRET_KEY||!VITE_SUPABASE_URL)return json(503,{error:"Webhook not configured"});
  const raw=event.isBase64Encoded?Buffer.from(event.body||"","base64").toString("utf8"):event.body||"";
  if(raw.length>300000)return json(413,{error:"Payload too large"});
  if(!verifyStripeSignature(raw,event.headers["stripe-signature"]||event.headers["Stripe-Signature"],STRIPE_WEBHOOK_SECRET))return json(400,{error:"Invalid Stripe signature"});
@@ -37,7 +37,7 @@ export const handler=async(event)=>{
   if(!sub?.id||!merchantId||!userId||!customer)return json(422,{error:"Missing subscription ownership mapping"});
   const period=sub.items?.data?.[0]?.current_period_end||sub.current_period_end;
   const params={p_event_id:payload.id,p_event_created:payload.created,p_merchant_id:merchantId,p_user_id:userId,p_customer_id:typeof customer==="string"?customer:customer.id,p_subscription_id:sub.id,p_status:sub.status||"incomplete",p_period_end:period?new Date(period*1000).toISOString():null,p_cancel_at_period_end:!!sub.cancel_at_period_end};
-  const r=await fetch(VITE_SUPABASE_URL+"/rest/v1/rpc/apply_stripe_billing_event",{method:"POST",headers:{"content-type":"application/json",apikey:SUPABASE_SERVICE_ROLE_KEY,Authorization:"Bearer "+SUPABASE_SERVICE_ROLE_KEY},body:JSON.stringify(params),signal:AbortSignal.timeout(10000)});
+  const r=await fetch(VITE_SUPABASE_URL+"/rest/v1/rpc/apply_stripe_billing_event",{method:"POST",headers:{"content-type":"application/json",apikey:SUPABASE_SECRET_KEY,Authorization:"Bearer "+SUPABASE_SECRET_KEY},body:JSON.stringify(params),signal:AbortSignal.timeout(10000)});
   if(!r.ok)throw Error("Billing sync failed");
   return json(200,{received:true});
  }catch{return json(500,{error:"Webhook processing failed; Stripe may retry"});}
