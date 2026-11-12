@@ -3,7 +3,7 @@ const HEADERS = {"content-type":"application/json","cache-control":"no-store"};
 const json=(statusCode,body)=>({statusCode,headers:HEADERS,body:JSON.stringify(body)});
 export const handler = async (event) => {
   if(event.httpMethod!=="POST") return json(405,{error:"Method not allowed"});
-  if(!process.env.OPENAI_API_KEY) return json(503,{error:"AI assistant not configured"});
+  if(!process.env.OPENAI_API_KEY) return json(503,{error:"OpenAI key unavailable to this Netlify Function",code:"OPENAI_KEY_MISSING_AT_RUNTIME",diagnostic_version:"merchant-v2-envcheck-1"});
   // Reuse the publishable frontend configuration for authenticated Supabase requests.
   // These are public identifiers, not service-role credentials.
   const supabaseUrl = (process.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
