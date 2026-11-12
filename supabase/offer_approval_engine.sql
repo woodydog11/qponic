@@ -70,6 +70,7 @@ begin
    else
      v_proposal:=jsonb_build_object('title',v_offer.title,'description',v_offer.description,'type',v_offer.type,'terms',v_offer.terms,'expiration',v_offer.expiration,'redemption_limit',v_offer.redemption_limit,'redemption_method',v_offer.redemption_method);
    end if;
+   if exists(select 1 from jsonb_each_text(v_proposal) as kv(key,value) where lower(kv.value) like '%merchant to confirm%') then raise exception 'Complete all unconfirmed offer terms before submission'; end if;
    if (v_proposal->>'type') not in ('FREE','BOGO','50% OFF') or exists(select 1 from jsonb_array_elements_text(to_jsonb(array['title','description','terms','expiration','redemption_limit','redemption_method'])) as keys(value) where nullif(btrim(v_proposal->>keys.value), '') is null) then raise exception 'Incomplete offer'; end if;
    select coalesce(max(revision_number),0)+1 into v_version from public.offer_revisions where offer_id=p_offer;
    update public.offers set title=v_proposal->>'title',description=v_proposal->>'description',type=v_proposal->>'type',terms=v_proposal->>'terms',expiration=v_proposal->>'expiration',redemption_limit=v_proposal->>'redemption_limit',redemption_method=v_proposal->>'redemption_method',status='pending_review',review_version=v_version,approved_version=null,updated_at=now() where id=p_offer;
@@ -86,7 +87,8 @@ begin
    if not v_admin or v_offer.status<>'pending_review' or nullif(btrim(p_notes),'') is null then raise exception 'Notes and pending offer required'; end if;
    if p_action='request_changes' and p_proposal is not null then
      v_proposal:=p_proposal;
-     if (v_proposal->>'type') not in ('FREE','BOGO','50% OFF') or exists(select 1 from jsonb_array_elements_text(to_jsonb(array['title','description','terms','expiration','redemption_limit','redemption_method'])) as keys(value) where nullif(btrim(v_proposal->>keys.value), '') is null) then raise exception 'Incomplete proposed revision'; end if;
+     if exists(select 1 from jsonb_each_text(v_proposal) as kv(key,value) where lower(kv.value) like '%merchant to confirm%') then raise exception 'Complete all unconfirmed offer terms before submission'; end if;
+   if (v_proposal->>'type') not in ('FREE','BOGO','50% OFF') or exists(select 1 from jsonb_array_elements_text(to_jsonb(array['title','description','terms','expiration','redemption_limit','redemption_method'])) as keys(value) where nullif(btrim(v_proposal->>keys.value), '') is null) then raise exception 'Incomplete proposed revision'; end if;
      select coalesce(max(revision_number),0)+1 into v_version from public.offer_revisions where offer_id=p_offer;
      insert into public.offer_revisions(offer_id,revision_number,submitted_by,role,title,description,type,terms,expiration,redemption_limit,redemption_method)
      values(p_offer,v_version,p_actor,'admin',v_proposal->>'title',v_proposal->>'description',v_proposal->>'type',v_proposal->>'terms',v_proposal->>'expiration',v_proposal->>'redemption_limit',v_proposal->>'redemption_method') returning id into v_revision;
