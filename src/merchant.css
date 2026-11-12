@@ -4,3 +4,5 @@
 .studio-auth form .studio-forgot{background:transparent;color:#43663d;padding:10px;border:0;font-size:12px;text-decoration:underline;text-underline-offset:3px}
 
 .studio-passwordless{display:grid;gap:16px;margin-top:25px}.studio-passwordless .studio-google{border:1px solid #d5ddd1;background:white;color:#1b261d;padding:15px;border-radius:10px;font-weight:800}.studio-passwordless .studio-or{text-align:center;font-size:12px;color:#899389}.studio-passwordless form{margin-top:0}
+
+.studio-review-nav{display:flex;gap:10px;margin:0 0 20px}.studio-review-nav button{background:#edf3e5;border:1px solid #d5e3c7;border-radius:30px;padding:11px 16px;font-weight:800;color:#263b29}
