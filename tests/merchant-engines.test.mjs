@@ -1,0 +1,15 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {SYSTEM_PROMPT,validateEngineResult,evaluateUnitEconomics,TYPES} from "../netlify/functions/merchant-engines.mjs";
+test("three allowed categories only",()=>assert.deepEqual(TYPES,["FREE","BOGO","50% OFF"]));
+test("restaurant: BOGO economics account for two pizzas",()=>assert.equal(evaluateUnitEconomics({price:20,unitCost:7}).BOGO,6));
+test("salon: half-price appointment contribution",()=>assert.equal(evaluateUnitEconomics({price:80,unitCost:25})["50% OFF"],15));
+test("retail: BOGO can lose money with high unit cost",()=>assert.equal(evaluateUnitEconomics({price:50,unitCost:35}).BOGO,-20));
+test("fitness: free trial can cost little with spare capacity",()=>assert.equal(evaluateUnitEconomics({price:25,unitCost:2}).FREE,-2));
+test("home services: discount can lose money",()=>assert.equal(evaluateUnitEconomics({price:120,unitCost:75})["50% OFF"],-15));
+test("entertainment: BOGO marginal cost",()=>assert.equal(evaluateUnitEconomics({price:30,unitCost:4}).BOGO,22));
+test("no fabricated projections in prompt",()=>assert.match(SYSTEM_PROMPT,/never fabricate price, costs, margins/));
+test("one question and existing offer review",()=>{assert.match(SYSTEM_PROMPT,/at most ONE useful question/);assert.match(SYSTEM_PROMPT,/IMPROVE an existing one/);});
+test("valid incomplete strategy",()=>{const p={reply:"What is your usual price?",ready:false,draft:null,strategy:{goal:"fill Tuesdays",recommendation:"BOGO",rationale:"Unused capacity",assumptions:[],risks:["Cannibalization"],comparisons:[]}};assert.equal(validateEngineResult(p).ready,false);});
+test("reject incomplete ready draft",()=>assert.throws(()=>validateEngineResult({reply:"Ready",ready:true,draft:{type:"BOGO"},strategy:{goal:"new customers",recommendation:"BOGO",rationale:"",assumptions:[],risks:[],comparisons:[]}}),/Incomplete draft/));
+test("reject invalid recommendation",()=>assert.throws(()=>validateEngineResult({reply:"",ready:false,draft:null,strategy:{goal:"",recommendation:"75% OFF",rationale:"",assumptions:[],risks:[],comparisons:[]}}),/Invalid strategy/));

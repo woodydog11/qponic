@@ -17,7 +17,7 @@ const savedKey = "qponic-demo-saved-v1";
 function loadSaved(): string[] {try { const stored = JSON.parse(localStorage.getItem(savedKey) || "[]"); return Array.isArray(stored) ? stored.filter((x):x is string=>typeof x==="string") : [];}catch{return [];}}
 export default function App() {
   const [kind,setKind] = useState<Kind | "ALL">("ALL");
-  const [merchantStudio,setMerchantStudio] = useState(false);
+  const [merchantStudio,setMerchantStudio] = useState(()=>new URLSearchParams(window.location.search).has("merchant")||new URLSearchParams(window.location.hash.replace(/^#/,"")).has("access_token")||new URLSearchParams(window.location.search).has("token_hash")||new URLSearchParams(window.location.hash.replace(/^#/,"")).has("error_description"));
   const [search,setSearch] = useState("");
   const [onlySaved,setOnlySaved] = useState(false);
   const [saved,setSaved] = useState<string[]>(loadSaved);
