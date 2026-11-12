@@ -4,7 +4,11 @@ const json=(statusCode,body)=>({statusCode,headers:HEADERS,body:JSON.stringify(b
 export const handler = async (event) => {
   if(event.httpMethod!=="POST") return json(405,{error:"Method not allowed"});
   if(!process.env.OPENAI_API_KEY) return json(503,{error:"AI assistant not configured"});
-  // Reuse the publishable frontend configuration for authenticated Supabase requests.\n  // These are public identifiers, not service-role credentials.\n  const supabaseUrl = (process.env.VITE_SUPABASE_URL || "").replace(/\\/$/, "");\n  const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;\n  if(!supabaseUrl || !supabaseKey) return json(503,{error:"Merchant authentication not configured"});
+  // Reuse the publishable frontend configuration for authenticated Supabase requests.
+  // These are public identifiers, not service-role credentials.
+  const supabaseUrl = (process.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if(!supabaseUrl || !supabaseKey) return json(503,{error:"Merchant authentication not configured"});
   const authorization=event.headers.authorization || event.headers.Authorization || "";
   if(!/^Bearer\s+\S+$/.test(authorization)) return json(401,{error:"Merchant sign-in required"});
   const token=authorization.replace(/^Bearer\s+/,"");
