@@ -2,3 +2,5 @@
 .studio-strategy{background:#f3f7ed;border:1px solid #e0e9d7;border-radius:12px;padding:15px;margin:14px 0}.studio-strategy strong{font-size:13px}.studio-strategy p{font-size:12px;line-height:1.6;color:#4e5c4e;margin:9px 0}.studio-strategy summary{font-size:12px;font-weight:700;cursor:pointer}
 
 .studio-auth form .studio-forgot{background:transparent;color:#43663d;padding:10px;border:0;font-size:12px;text-decoration:underline;text-underline-offset:3px}
+
+.studio-passwordless{display:grid;gap:16px;margin-top:25px}.studio-passwordless .studio-google{border:1px solid #d5ddd1;background:white;color:#1b261d;padding:15px;border-radius:10px;font-weight:800}.studio-passwordless .studio-or{text-align:center;font-size:12px;color:#899389}.studio-passwordless form{margin-top:0}
