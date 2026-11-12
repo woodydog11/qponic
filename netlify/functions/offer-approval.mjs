@@ -32,9 +32,9 @@ export const handler=async(event)=>{
    if(view==="identity")return respond(200,{isAdmin,merchantIds});
    if(view==="offers"){
     if(!isAdmin&&!merchantIds.length)return respond(200,{offers:[],isAdmin});
-    const filter=isAdmin?"status=in.(pending_review,changes_requested,declined,published)":"merchant_id=in.("+merchantIds.join(",")+")";
+    const filter=isAdmin?"status=in.(draft,pending_review,changes_requested,declined,published)":"merchant_id=in.("+merchantIds.join(",")+")";
     const offers=await rest("offers?select=id,merchant_id,title,description,type,terms,expiration,redemption_limit,redemption_method,status,review_version,approved_version,updated_at&"+filter+"&order=updated_at.desc&limit=200",secret,base);
-    return respond(200,{offers,isAdmin});
+    return respond(200,{offers,isAdmin,merchantIds});
    }
    if(view==="history"){
     const offerId=params.get("offer_id");
@@ -54,7 +54,8 @@ export const handler=async(event)=>{
    return respond(400,{error:"Unknown view"});
   }
   let body;try{if((event.body||"").length>16000)return respond(413,{error:"Request too large"});body=JSON.parse(event.body||"{}");}catch{return respond(400,{error:"Invalid JSON"})}
-  if(!["submit","approve","request_changes","decline"].includes(body.action))return respond(400,{error:"Invalid action"});
+  if(!["submit","approve","request_changes","decline","mark_read"].includes(body.action))return respond(400,{error:"Invalid action"});
+  if(body.action==="mark_read"){if(!/^[0-9a-f-]{36}$/i.test(body.notification_id||""))return respond(400,{error:"Invalid notification ID"});await rest("offer_notifications?id=eq."+body.notification_id+"&recipient_id=eq."+user.id,secret,base,{method:"PATCH",headers:{Prefer:"return=minimal"},body:JSON.stringify({read_at:new Date().toISOString()})});return respond(200,{ok:true});}
   if(!/^[0-9a-f-]{36}$/i.test(body.offer_id||""))return respond(400,{error:"Invalid offer ID"});
   if((body.action==="approve"||body.action==="request_changes"||body.action==="decline")&&!isAdmin)return respond(403,{error:"Administrator access required"});
   if(typeof body.notes!=="undefined"&&(typeof body.notes!=="string"||body.notes.length>2000))return respond(400,{error:"Invalid notes"});
