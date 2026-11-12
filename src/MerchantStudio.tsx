@@ -81,9 +81,8 @@ export default function MerchantStudio({onBack}:{onBack:()=>void}){
  async function savePortfolio(){
   if(busy||!merchantId||!chosen.length)return;
   const offers=portfolio.filter(o=>chosen.includes(o.type));
-  if(offers.some(o=>["terms","expiration","redemption_limit","redemption_method","merchant_name"].some(k=>String(o[k as keyof Draft]).includes("Merchant to confirm")))){setError("Please replace all 'Merchant to confirm' details before saving selected offers.");return;}
   setBusy(true);setError("");
-  try{for(const o of offers){const payload={merchant_id:merchantId,title:o.title,description:o.description,type:o.type,terms:o.terms,expiration:o.expiration,redemption_limit:o.redemption_limit,redemption_method:o.redemption_method,status:"draft"};const r=await fetch(url+"/rest/v1/offers",{method:"POST",headers:{...headers(),Authorization:"Bearer "+token,Prefer:"return=minimal"},body:JSON.stringify(payload)});if(!r.ok){const d=await r.json().catch(()=>({}));throw Error(d.message||"Could not save "+o.type);}}setPortfolio([]);setShowOffers(true);setNotice("Selected offers saved as drafts. Open each offer and submit it for administrator review.");}catch(e){setError(e instanceof Error?e.message:"Could not save offers");}finally{setBusy(false);}
+  try{for(const o of offers){const payload={merchant_id:merchantId,title:o.title,description:o.description,type:o.type,terms:o.terms,expiration:o.expiration,redemption_limit:o.redemption_limit,redemption_method:o.redemption_method,status:"draft"};const r=await fetch(url+"/rest/v1/offers",{method:"POST",headers:{...headers(),Authorization:"Bearer "+token,Prefer:"return=minimal"},body:JSON.stringify(payload)});if(!r.ok){const d=await r.json().catch(()=>({}));throw Error(d.message||"Could not save "+o.type);}}setPortfolio([]);setShowOffers(true);setNotice("Selected offers saved as drafts. You can complete missing details before submitting each for administrator review.");}catch(e){setError(e instanceof Error?e.message:"Could not save offers");}finally{setBusy(false);}
  }
  async function save(){
   if(!draft||!merchantId||busy)return;setBusy(true);setError("");
