@@ -4,19 +4,19 @@ const json=(statusCode,body)=>({statusCode,headers:HEADERS,body:JSON.stringify(b
 export const handler = async (event) => {
   if(event.httpMethod!=="POST") return json(405,{error:"Method not allowed"});
   if(!process.env.OPENAI_API_KEY) return json(503,{error:"AI assistant not configured"});
-  if(!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) return json(503,{error:"Merchant authentication not configured"});
+  // Reuse the publishable frontend configuration for authenticated Supabase requests.\n  // These are public identifiers, not service-role credentials.\n  const supabaseUrl = (process.env.VITE_SUPABASE_URL || "").replace(/\\/$/, "");\n  const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;\n  if(!supabaseUrl || !supabaseKey) return json(503,{error:"Merchant authentication not configured"});
   const authorization=event.headers.authorization || event.headers.Authorization || "";
   if(!/^Bearer\s+\S+$/.test(authorization)) return json(401,{error:"Merchant sign-in required"});
   const token=authorization.replace(/^Bearer\s+/,"");
   let identity;
   try {
-    const response=await fetch(process.env.SUPABASE_URL+"/auth/v1/user",{headers:{apikey:process.env.SUPABASE_ANON_KEY,Authorization:"Bearer "+token},signal:AbortSignal.timeout(8000)});
+    const response=await fetch(supabaseUrl+"/auth/v1/user",{headers:{apikey:supabaseKey,Authorization:"Bearer "+token},signal:AbortSignal.timeout(8000)});
     if(!response.ok)return json(401,{error:"Invalid session"});
     identity=await response.json();
     if(!identity?.id)return json(401,{error:"Invalid session"});
   }catch{return json(502,{error:"Authentication unavailable"});}
   // Membership must be checked server-side, never inferred from client metadata.
-  const membership=await fetch(process.env.SUPABASE_URL+"/rest/v1/merchant_memberships?select=merchant_id&user_id=eq."+encodeURIComponent(identity.id)+"&limit=1",{headers:{apikey:process.env.SUPABASE_ANON_KEY,Authorization:"Bearer "+token},signal:AbortSignal.timeout(8000)}).catch(()=>null);
+  const membership=await fetch(supabaseUrl+"/rest/v1/merchant_memberships?select=merchant_id&user_id=eq."+encodeURIComponent(identity.id)+"&limit=1",{headers:{apikey:supabaseKey,Authorization:"Bearer "+token},signal:AbortSignal.timeout(8000)}).catch(()=>null);
   if(!membership?.ok)return json(403,{error:"Merchant access not configured or not authorized"});
   const memberships=await membership.json();
   if(!Array.isArray(memberships)||!memberships.length)return json(403,{error:"Merchant access required"});
