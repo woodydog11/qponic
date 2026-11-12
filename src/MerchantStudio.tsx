@@ -12,7 +12,7 @@ export default function MerchantStudio({onBack}:{onBack:()=>void}){
  async function auth(mode:"login"|"signup"){
   setError("");setBusy(true);try{
    if(!key)throw new Error("Add VITE_SUPABASE_PUBLISHABLE_KEY to Netlify first.");
-   const path=mode==="login"?"/auth/v1/token?grant_type=password":"/auth/v1/signup";
+   const path=mode==="login"?"/auth/v1/token?grant_type=password":"/auth/v1/signup?redirect_to="+encodeURIComponent(window.location.origin+"/");
    const r=await fetch(url+path,{method:"POST",headers:headers(),body:JSON.stringify({email,password})});
    const data=await r.json();if(!r.ok)throw new Error(data.msg||data.error_description||data.message||"Authentication failed");
    if(data.access_token){setToken(data.access_token);setNotice("");}else setNotice("Check your email to confirm your account, then sign in.");
