@@ -25,8 +25,8 @@ export function computePromotion(type:OfferKind,m:Model){
 export default function ProfitSimulator({offers,selected}:{offers:OfferInput[];selected:string[]}){
  const [models,setModels]=useState(initial);
  const [intro,setIntro]=useState(false);
- const [low,setLow]=useState(0.5);
- const [high,setHigh]=useState(1.5);
+ const low=0.5;
+ const high=1.5;
  const active=kinds.filter(k=>selected.includes(k)&&offers.some(o=>o.type===k));
  const fee=intro?29:79;
  const results=useMemo(()=>active.map(k=>({type:k,...computePromotion(k,models[k])})),[models,selected,offers]);
