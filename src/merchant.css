@@ -47,3 +47,5 @@
  .studio-composer{flex:0 0 auto;background:white}
  .studio-chat>.studio-save{flex:0 0 auto}
 }
+
+.studio-composer .studio-mic{flex:0 0 auto;display:grid;place-items:center;min-width:38px;min-height:38px;padding:7px;border-radius:50%;background:#f0f5eb;color:#2a4930;border:1px solid #cdddc8;cursor:pointer}.studio-composer .studio-mic.listening{background:#ffe7e7;color:#a32424;border-color:#e4a4a4;animation:qponic-mic-pulse 1.3s ease-in-out infinite}.studio-composer .studio-mic:disabled{opacity:.4;cursor:not-allowed}@keyframes qponic-mic-pulse{50%{box-shadow:0 0 0 5px #f5baba77}}@media(prefers-reduced-motion:reduce){.studio-composer .studio-mic.listening{animation:none}}
