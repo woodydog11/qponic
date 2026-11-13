@@ -44,7 +44,18 @@ export const handler = async (event) => {
     if(!response.ok)return portfolio?json(200,fallbackPortfolio()):json(502,{error:"AI provider unavailable"});
     const data=await response.json();let parsed;try{parsed=JSON.parse(data.choices?.[0]?.message?.content||"{}");}catch{return portfolio?json(200,fallbackPortfolio()):json(502,{error:"AI returned an unreadable response. Please retry.",code:"AI_JSON_INVALID"});}
     if(portfolio){const types=["FREE","BOGO","50% OFF"];const fields=["title","description","type","terms","expiration","redemption_limit","merchant_name","redemption_method","rationale","risks"];if(!Array.isArray(parsed.offers)||parsed.offers.length!==3||types.some(t=>parsed.offers.filter(o=>o.type===t).length!==1)||parsed.offers.some(o=>fields.some(k=>typeof o[k]!=="string"||!o[k].trim()||o[k].length>1500)))return json(200,fallbackPortfolio());return json(200,{reply:typeof parsed.reply==="string"?parsed.reply.slice(0,1500):"Review all three suggested promotions before submitting.",offers:types.map(t=>parsed.offers.find(o=>o.type===t)),merchant_id:memberships[0].merchant_id});}
-    let result;try{result=validateEngineResult(parsed);}catch{return json(502,{error:"AI response did not match the expected format. Please retry.",code:"CHAT_VALIDATION_FAILED"});}
+    // Conversational responses should never fail merely because optional strategy
+    // metadata is missing or the model returned a partial draft.
+    const safeStrategy={goal:"",recommendation:null,rationale:"",assumptions:[],risks:[],comparisons:[]};
+    const normalized={reply:typeof parsed.reply==="string"&&parsed.reply.trim()?parsed.reply:"Tell me a little about your business and what you'd like your promotion to accomplish.",ready:parsed.ready===true,draft:parsed.draft??null,strategy:{...safeStrategy,...(parsed.strategy&&typeof parsed.strategy==="object"&&!Array.isArray(parsed.strategy)?parsed.strategy:{})}};
+    if(!Array.isArray(normalized.strategy.assumptions))normalized.strategy.assumptions=[];
+    if(!Array.isArray(normalized.strategy.risks))normalized.strategy.risks=[];
+    if(!Array.isArray(normalized.strategy.comparisons))normalized.strategy.comparisons=[];
+    if(typeof normalized.strategy.goal!=="string")normalized.strategy.goal="";
+    if(typeof normalized.strategy.rationale!=="string")normalized.strategy.rationale="";
+    if(!["FREE","BOGO","50% OFF"].includes(normalized.strategy.recommendation))normalized.strategy.recommendation=null;
+    if(normalized.ready&&(!normalized.draft||!["FREE","BOGO","50% OFF"].includes(normalized.draft.type)||["title","description","terms","expiration","redemption_limit","merchant_name","redemption_method"].some(k=>typeof normalized.draft[k]!=="string"||!normalized.draft[k].trim()))) {normalized.ready=false;normalized.draft=null;}
+    let result;try{result=validateEngineResult(normalized);}catch{return json(200,{reply:normalized.reply.slice(0,1800),ready:false,draft:null,strategy:safeStrategy,merchant_id:memberships[0].merchant_id,status:"draft"});}
     return json(200,{...result,merchant_id:memberships[0].merchant_id,status:"draft"});
   }catch(e){if(portfolio)return json(200,fallbackPortfolio());return json(502,{error:e?.name==="AbortError"?"AI request timed out. Please retry.":"AI request failed. Please retry.",code:e?.name==="AbortError"?"AI_TIMEOUT":"AI_REQUEST_FAILED"});}finally{clearTimeout(timeout);}
 };
