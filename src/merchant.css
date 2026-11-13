@@ -28,3 +28,5 @@
 @media(max-width:750px){.studio-portfolio-card{padding:14px}}
 
 .studio-policy-summary{background:#edf4e5;border-radius:9px;padding:10px 12px;font-weight:700;color:#35572d}.studio-portfolio-details{font-size:12px;line-height:1.55;border-top:1px solid #e5ece0;padding-top:10px}.studio-portfolio-details p{margin:5px 0;overflow-wrap:anywhere}.profit-months{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;margin:12px 0}.profit-months input{max-width:110px;padding:9px;border:1px solid #d8e3d1;border-radius:8px}
+
+.studio-merchant-actions{display:flex;gap:8px;flex-wrap:wrap}.studio-merchant-actions button{border:1px solid #cfdfc7;background:#f5f9ef;color:#25412a;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:800;cursor:pointer}.studio-merchant-actions button[aria-pressed=true]{background:#23422c;color:white}.studio-portfolio-fields textarea{font-family:inherit;font-size:13px}.studio-portfolio .studio-save{margin-top:8px}
