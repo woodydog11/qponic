@@ -26,7 +26,7 @@ export default function ProfitSimulator({offers,selected}:{offers:OfferInput[];s
  const [models,setModels]=useState(initial);
  const [intro,setIntro]=useState(false);const [months,setMonths]=useState(1);
  const low=0.5;
- const high=1.5;
+ 
  const active=kinds.filter(k=>selected.includes(k)&&offers.some(o=>o.type===k));
  const fee=(intro?29:79)+Math.max(0,months-1)*79;
  const results=useMemo(()=>active.map(k=>({type:k,...computePromotion(k,models[k])})),[models,selected,offers]);
@@ -34,7 +34,7 @@ export default function ProfitSimulator({offers,selected}:{offers:OfferInput[];s
  const net=contribution-fee;
  const update=(kind:OfferKind,key:keyof Model,v:string)=>setModels(old=>({...old,[kind]:{...old[kind],[key]:clamp(Number(v),0,key==="displacement"?100:100000)}}));
  const scenario=(factor:number)=>results.reduce((sum,r)=>sum+r.perRedemption*Math.min(models[r.type].redemptions,Math.round(models[r.type].redemptions*factor)),0)-fee;
- const breakEven=contribution>=fee&&contribution>0?Math.ceil(fee/contribution*results.reduce((sum,r)=>sum+models[r.type].redemptions,0)):null;
+ const breakEven=contribution>0?Math.ceil(fee/contribution*results.reduce((sum,r)=>sum+models[r.type].redemptions,0)):null;
  return <section className="profit-simulator" aria-label="Qponic Profit Simulator">
  <div className="profit-head"><span>ESTIMATED ECONOMICS</span><h3>Qponic Profit Simulator</h3><p>Model a campaign through its maximum honored redemptions, not QR claims. All values are illustrative assumptions, not forecasts.</p></div>
  <div className="profit-fee"><span>Subscription period</span><div><button aria-pressed={!intro} onClick={()=>setIntro(false)}>Ongoing · $79/mo</button><button aria-pressed={intro} onClick={()=>setIntro(true)}>First month · $29</button></div><label className="profit-months">Estimated months until redemption limits are reached <input type="number" min="1" max="36" value={months} onChange={e=>setMonths(clamp(Number(e.target.value),1,36))}/></label><p className="profit-disclaimer">Offers may stay active until redemption capacity is exhausted. Subscription fees continue each month while the merchant remains subscribed; completion time is uncertain.</p></div>
@@ -47,8 +47,8 @@ export default function ProfitSimulator({offers,selected}:{offers:OfferInput[];s
  </div><div className="profit-line"><span>Contribution per redeemed offer</span><b>{money(r.promo)}</b></div><div className="profit-line"><span>Net incremental contribution before platform fee</span><b>{money(r.contribution)}</b></div>
  {r.promo<0&&<p className="profit-warning">This offer has negative contribution even before accounting for displaced sales.</p>}</div>})}
  <div className="profit-total"><span>Estimated full-campaign net benefit after platform fees</span><strong className={net>=0?"positive":"negative"}>{money(net)}</strong><small>{active.length} selected offer{active.length===1?"":"s"} · one shared {money(fee)} subscription cost over {months} month{months===1?"":"s"}</small></div>
- <div className="profit-scenarios"><h4>Redemption volume scenarios</h4><div><span>50% of capacity redeemed</span><b>{money(scenario(low))}</b></div><div><span>100% of capacity redeemed</span><b>{money(net)}</b></div><div><span>100% capacity ceiling (no over-redemption)</span><b>{money(scenario(high))}</b></div></div>
- <p className="profit-break-even">Break-even under these assumptions: <strong>{breakEven===null?"Not achievable under these assumptions":breakEven+" total redemptions"}</strong> at the modeled offer mix.</p>
+ <div className="profit-scenarios"><h4>Redemption volume scenarios</h4><div><span>50% of capacity redeemed</span><b>{money(scenario(low))}</b></div><div><span>100% of capacity redeemed</span><b>{money(net)}</b></div></div>
+ <p className="profit-break-even">Break-even under these assumptions: <strong>{breakEven===null?"Not achievable under these assumptions":breakEven+" total redemptions"}</strong> at the modeled offer mix. {breakEven!==null&&breakEven>results.reduce((sum,r)=>sum+models[r.type].redemptions,0)?"The current capacity is insufficient to reach break-even.":""}</p>
  <p className="profit-disclaimer">Illustrative only. FREE assumes a free low-cost add-on with a full-price item; BOGO assumes two items for the price of one. Displaced sales represent purchases that would otherwise occur at full price. These estimates exclude extra labor, marketing, taxes, changes in basket size, repeat purchases, and interactions between simultaneous offers. Do not add redemptions across offers if the same order uses more than one offer. A merchant-authorized exception may increase actual honored redemptions beyond the original cap. The model does not include exceptions. Qponic does not guarantee additional sales or profit.</p>
  </section>;
 }
