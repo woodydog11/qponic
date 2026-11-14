@@ -42,9 +42,9 @@ export default function MerchantStudio({onBack}:{onBack:()=>void}){
   }catch{setListening(false);setError("Could not start dictation. Check microphone permissions.");}
  }
  useEffect(()=>()=>{speechRef.current?.abort();speechRef.current=null;},[]);
- const [messages,setMessages]=useState<Message[]>([{role:"assistant",content:"Welcome to Qponic Merchant Studio. Let's create the best Free, 1/2 Off, and BOGO offers ever!\\n\\nLet's chat about your business and build a campaign that brings more customers through your door."}]);
+ const [messages,setMessages]=useState<Message[]>([{role:"assistant",content:"Welcome to Qponic Merchant Studio. Let's create the best Free, 1/2 Off, and BOGO offers ever!\n\nLet's chat about your business and build a campaign that brings more customers through your door."}]);
  const [greetingCount,setGreetingCount]=useState(0);
- useEffect(()=>{const full="Welcome to Qponic Merchant Studio. Let's create the best Free, 1/2 Off, and BOGO offers ever!\\n\\nLet's chat about your business and build a campaign that brings more customers through your door.";const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;if(reduced){setGreetingCount(full.length);return;}let index=0;const interval=window.setInterval(()=>{index=Math.min(full.length,index+2);setGreetingCount(index);if(index>=full.length)window.clearInterval(interval);},24);return()=>window.clearInterval(interval);},[]);
+ useEffect(()=>{const full="Welcome to Qponic Merchant Studio. Let's create the best Free, 1/2 Off, and BOGO offers ever!\n\nLet's chat about your business and build a campaign that brings more customers through your door.";const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;if(reduced){setGreetingCount(full.length);return;}let index=0;const interval=window.setInterval(()=>{index=Math.min(full.length,index+2);setGreetingCount(index);if(index>=full.length)window.clearInterval(interval);},24);return()=>window.clearInterval(interval);},[]);
  const [entry,setEntry]=useState("");const [busy,setBusy]=useState(false);const [error,setError]=useState("");
  const [draft,setDraft]=useState<Draft|null>(null);const [strategy,setStrategy]=useState<Strategy|null>(null);
  const [merchantId,setMerchantId]=useState("");const [saved,setSaved]=useState(false);const [notice,setNotice]=useState("");
