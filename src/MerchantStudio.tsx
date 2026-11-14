@@ -13,8 +13,8 @@ type SpeechEngine={lang:string;continuous:boolean;interimResults:boolean;onresul
 const SESSION_KEY="qponic_merchant_session_v1";
 const IDLE_MS=10*60*1000;
 type MerchantSession={access_token:string;refresh_token:string;last_activity:number};
-function readSession():MerchantSession|null{try{const raw=sessionStorage.getItem(SESSION_KEY);if(!raw)return null;const v=JSON.parse(raw) as MerchantSession;if(!v.access_token||!v.refresh_token||!Number.isFinite(v.last_activity)||Date.now()-v.last_activity>=IDLE_MS){sessionStorage.removeItem(SESSION_KEY);return null;}return v;}catch{sessionStorage.removeItem(SESSION_KEY);return null;}}
-function clearSession(){sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem("qponic_merchant_refresh");}
+function readSession():MerchantSession|null{try{const raw=localStorage.getItem(SESSION_KEY);if(!raw)return null;const v=JSON.parse(raw) as MerchantSession;if(!v.access_token||!v.refresh_token||!Number.isFinite(v.last_activity)||Date.now()-v.last_activity>=IDLE_MS){localStorage.removeItem(SESSION_KEY);return null;}return v;}catch{localStorage.removeItem(SESSION_KEY);return null;}}
+function clearSession(){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem("qponic_merchant_refresh");}
 const headers=()=>({"Content-Type":"application/json",apikey:key});
 function ChatMessage({message,onProgress}:{message:Message;onProgress:()=>void}){
  const [visible,setVisible]=useState(()=>message.role==="user"?message.content.length:0);
@@ -33,9 +33,9 @@ export default function MerchantStudio({onBack}:{onBack:()=>void}){
  const lastActivity=useRef(Date.now());
  const tokenRef=useRef("");
  const expireSession=()=>{clearSession();tokenRef.current="";setToken("");setNotice("Your merchant session expired after 10 minutes of inactivity. Please sign in again.");};
- const acceptSession=(access_token:string,refresh_token:string)=>{lastActivity.current=Date.now();tokenRef.current=access_token;sessionStorage.setItem(SESSION_KEY,JSON.stringify({access_token,refresh_token,last_activity:lastActivity.current}));setToken(access_token);setNotice("");};
+ const acceptSession=(access_token:string,refresh_token:string)=>{lastActivity.current=Date.now();tokenRef.current=access_token;localStorage.setItem(SESSION_KEY,JSON.stringify({access_token,refresh_token,last_activity:lastActivity.current}));setToken(access_token);setNotice("");};
  useEffect(()=>{tokenRef.current=token;},[token]);
- useEffect(()=>{if(!token)return;const activity=()=>{const current=readSession();if(!current){expireSession();return;}const now=Date.now();lastActivity.current=now;sessionStorage.setItem(SESSION_KEY,JSON.stringify({...current,last_activity:now}));};const events=["pointerdown","keydown","touchstart"] as const;events.forEach(event=>window.addEventListener(event,activity,{passive:true}));const timer=window.setInterval(()=>{if(Date.now()-lastActivity.current>=IDLE_MS)expireSession();},15000);return()=>{events.forEach(event=>window.removeEventListener(event,activity));window.clearInterval(timer);};},[token]);
+ useEffect(()=>{if(!token)return;const activity=()=>{const current=readSession();if(!current){expireSession();return;}const now=Date.now();lastActivity.current=now;localStorage.setItem(SESSION_KEY,JSON.stringify({...current,last_activity:now}));};const sync=(event:StorageEvent)=>{if(event.key!==SESSION_KEY)return;const current=readSession();if(!current){tokenRef.current="";setToken("");return;}lastActivity.current=current.last_activity;if(current.access_token!==tokenRef.current){tokenRef.current=current.access_token;setToken(current.access_token);}};const events=["pointerdown","keydown","touchstart"] as const;events.forEach(event=>window.addEventListener(event,activity,{passive:true}));window.addEventListener("storage",sync);const timer=window.setInterval(()=>{const current=readSession();if(!current){expireSession();return;}lastActivity.current=current.last_activity;if(current.access_token!==tokenRef.current){tokenRef.current=current.access_token;setToken(current.access_token);}},15000);return()=>{events.forEach(event=>window.removeEventListener(event,activity));window.removeEventListener("storage",sync);window.clearInterval(timer);};},[token]);
  const speechRef=useRef<SpeechEngine|null>(null);
  const [listening,setListening]=useState(false);
  const [dictationSupported]=useState(()=>typeof window!=="undefined"&&!!(window as unknown as {SpeechRecognition?:unknown;webkitSpeechRecognition?:unknown}).SpeechRecognition||typeof window!=="undefined"&&!!(window as unknown as {webkitSpeechRecognition?:unknown}).webkitSpeechRecognition);
@@ -57,7 +57,7 @@ export default function MerchantStudio({onBack}:{onBack:()=>void}){
  const messageEndRef=useRef<HTMLDivElement|null>(null);
  const followChat=useRef(true);
  const scrollChat=useCallback(()=>{const node=messageEndRef.current;if(node&&followChat.current)node.scrollTop=node.scrollHeight;},[]);
- useEffect(()=>{if(followChat.current)requestAnimationFrame(scrollChat);},[messages.length,busy,scrollChat]);
+ useEffect(()=>{if(followChat.current)requestAnimationFrame(scrollChat);},[messages.length,scrollChat]);
  const onChatWheel=(e:React.WheelEvent<HTMLDivElement>)=>{if(e.deltaY<0)followChat.current=false;else if(e.deltaY>0){const n=e.currentTarget;if(n.scrollHeight-n.scrollTop-n.clientHeight<80)followChat.current=true;}};
  const onChatScroll=(e:React.UIEvent<HTMLDivElement>)=>{const n=e.currentTarget;if(n.scrollHeight-n.scrollTop-n.clientHeight<40)followChat.current=true;};
  const [entry,setEntry]=useState("");const [busy,setBusy]=useState(false);const [error,setError]=useState("");
@@ -93,7 +93,7 @@ export default function MerchantStudio({onBack}:{onBack:()=>void}){
    setError(hash.get("error_description")||"Authentication failed");clear();
   }else{
    const session=readSession();
-   if(session){lastActivity.current=session.last_activity;refreshSession(session.refresh_token).catch(e=>{if(!cancelled){clearSession();setError(e instanceof Error?e.message:"Session restoration failed");}});}
+   if(session){lastActivity.current=session.last_activity;fetch(url+"/auth/v1/user",{headers:{apikey:key,Authorization:"Bearer "+session.access_token}}).then(async response=>{if(cancelled)return;if(response.ok){tokenRef.current=session.access_token;setToken(session.access_token);}else{const latest=readSession();if(latest&&latest.access_token!==session.access_token){tokenRef.current=latest.access_token;setToken(latest.access_token);}else await refreshSession(session.refresh_token);}}).catch(e=>{if(!cancelled){const latest=readSession();if(latest&&latest.access_token!==session.access_token){tokenRef.current=latest.access_token;setToken(latest.access_token);}else{clearSession();setError(e instanceof Error?e.message:"Session restoration failed");}}});}
   }
   return ()=>{cancelled=true};
  },[]);
