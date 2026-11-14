@@ -31,7 +31,7 @@ export default function MerchantStudio({onBack}:{onBack:()=>void}){
   }catch{setListening(false);setError("Could not start dictation. Check microphone permissions.");}
  }
  useEffect(()=>()=>{speechRef.current?.abort();speechRef.current=null;},[]);
- const [messages,setMessages]=useState<Message[]>([{role:"assistant",content:"Welcome to Qponic Merchant Studio. Tell me about your business and what you'd like to improve."}]);
+ const [messages,setMessages]=useState<Message[]>([{role:"assistant",content:"Welcome to Qponic Merchant Studio. Let\'s create the best Free, 1/2 Off, and BOGO offers ever!"}]);
  const [entry,setEntry]=useState("");const [busy,setBusy]=useState(false);const [error,setError]=useState("");
  const [draft,setDraft]=useState<Draft|null>(null);const [strategy,setStrategy]=useState<Strategy|null>(null);
  const [merchantId,setMerchantId]=useState("");const [saved,setSaved]=useState(false);const [notice,setNotice]=useState("");
