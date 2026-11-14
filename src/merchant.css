@@ -74,3 +74,5 @@
 .studio-building-track>div{position:absolute;height:100%;width:38%;background:#6aa64a;border-radius:9px;animation:qponic-build 1.6s ease-in-out infinite}
 @keyframes qponic-spin{to{transform:rotate(360deg)}}@keyframes qponic-build{0%{left:-38%}100%{left:100%}}
 @media(prefers-reduced-motion:reduce){.studio-building-spinner,.studio-building-track>div{animation:none}.studio-building-track>div{left:0;width:50%}}
+
+.studio-regenerate{flex:0 0 auto;border:0;border-top:1px solid #e6ece2;background:#fff;color:#52734a;font-size:12px;font-weight:700;padding:10px 14px;cursor:pointer;text-align:center}.studio-regenerate:hover{background:#f5f9f2}.studio-regenerate:disabled{opacity:.45;cursor:not-allowed}
