@@ -1,6 +1,6 @@
 import ProfitSimulator from "./ProfitSimulator";
 import OfferApproval from "./OfferApproval";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, Send, Sparkles, Save, LogOut, Mic, MicOff } from "lucide-react";
 import "./merchant.css";
 type Message={role:"user"|"assistant";content:string};
@@ -55,7 +55,7 @@ export default function MerchantStudio({onBack}:{onBack:()=>void}){
  useEffect(()=>()=>{speechRef.current?.abort();speechRef.current=null;},[]);
  const [messages,setMessages]=useState<Message[]>([{role:"assistant",content:"Welcome to Qponic Merchant Studio. Let's create the best Free, 1/2 Off, and BOGO offers ever!\n\nLet's chat about your business and build a campaign that brings more customers through your door."}]);
  const messageEndRef=useRef<HTMLDivElement|null>(null);
- const scrollChat=()=>{const node=messageEndRef.current;if(node&&node.scrollHeight-node.scrollTop-node.clientHeight<140)node.scrollTop=node.scrollHeight;};
+ const scrollChat=useCallback(()=>{const node=messageEndRef.current;if(node&&node.scrollHeight-node.scrollTop-node.clientHeight<140)node.scrollTop=node.scrollHeight;},[]);
  const [entry,setEntry]=useState("");const [busy,setBusy]=useState(false);const [error,setError]=useState("");
  const [draft,setDraft]=useState<Draft|null>(null);const [strategy,setStrategy]=useState<Strategy|null>(null);
  const [merchantId,setMerchantId]=useState("");const [saved,setSaved]=useState(false);const [notice,setNotice]=useState("");
