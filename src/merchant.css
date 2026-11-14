@@ -34,7 +34,7 @@
 /* Keep merchant conversation in view while the offer portfolio grows. */
 @media(min-width:751px){
  .studio-layout{align-items:start}
- .studio-chat{position:sticky;top:16px;height:calc(100dvh - 32px);max-height:850px;min-height:440px;display:flex;flex-direction:column;min-height:0}
+ .studio-chat{position:sticky;top:112px;height:clamp(320px,calc(100dvh - 260px),680px);max-height:none;min-height:0;display:flex;flex-direction:column}
  .studio-chat-title{flex:0 0 auto}
  .studio-messages{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain}
  .studio-composer{flex:0 0 auto;background:white}
