@@ -55,3 +55,14 @@
 /* Independent conversation scrolling on desktop and touch devices. */
 .studio-messages{overflow-y:auto;overflow-x:hidden;min-height:0;scrollbar-gutter:stable;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .studio-chat{min-width:0}
+
+.studio-readiness{padding:10px 16px 12px;background:#f8fbf5;border-bottom:1px solid #e6ede1;flex:0 0 auto}
+.studio-readiness-heading{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px;color:#52644f}
+.studio-readiness-heading strong{color:#213c27;font-size:12px;margin-right:auto}
+.studio-readiness-heading button{border:0;background:none;color:#416e37;text-decoration:underline;cursor:pointer;font-size:11px;font-weight:700}
+.studio-readiness-track{height:6px;background:#dfe9d8;border-radius:99px;overflow:hidden;margin-top:8px}
+.studio-readiness-track>div{height:100%;background:#74a84e;border-radius:99px;transition:width .3s ease}
+.studio-readiness-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:11px;max-height:190px;overflow-y:auto}
+.studio-readiness-details>div{padding:8px;background:white;border:1px solid #e4ece0;border-radius:8px;display:grid;gap:3px;min-width:0}
+.studio-readiness-details b{font-size:11px}.studio-readiness-details span{font-size:10px;color:#416e37;font-weight:700}.studio-readiness-details small{font-size:10px;color:#637064;overflow-wrap:anywhere}
+@media(max-width:500px){.studio-readiness-details{grid-template-columns:1fr}}
