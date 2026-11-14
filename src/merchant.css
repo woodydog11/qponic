@@ -66,3 +66,11 @@
 .studio-readiness-details>div{padding:8px;background:white;border:1px solid #e4ece0;border-radius:8px;display:grid;gap:3px;min-width:0}
 .studio-readiness-details b{font-size:11px}.studio-readiness-details span{font-size:10px;color:#416e37;font-weight:700}.studio-readiness-details small{font-size:10px;color:#637064;overflow-wrap:anywhere}
 @media(max-width:500px){.studio-readiness-details{grid-template-columns:1fr}}
+
+.studio-building{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #dbe9d2;background:#f6fbf2;border-radius:12px;max-width:92%;align-self:flex-start}
+.studio-building>div{min-width:0;flex:1}.studio-building strong{font-size:12px;color:#2b4a2b}.studio-building small{display:block;margin-top:6px;font-size:11px;color:#667b63}
+.studio-building-spinner{width:22px;height:22px;flex:0 0 auto;border:3px solid #d9e9cb;border-top-color:#4b8b40;border-radius:50%;animation:qponic-spin .8s linear infinite}
+.studio-building-track{height:5px;background:#dfebd5;border-radius:9px;margin-top:8px;overflow:hidden;position:relative}
+.studio-building-track>div{position:absolute;height:100%;width:38%;background:#6aa64a;border-radius:9px;animation:qponic-build 1.6s ease-in-out infinite}
+@keyframes qponic-spin{to{transform:rotate(360deg)}}@keyframes qponic-build{0%{left:-38%}100%{left:100%}}
+@media(prefers-reduced-motion:reduce){.studio-building-spinner,.studio-building-track>div{animation:none}.studio-building-track>div{left:0;width:50%}}
